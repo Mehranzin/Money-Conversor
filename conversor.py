@@ -5,30 +5,35 @@ def converter_moeda(valor, de, para):
     resposta = requests.get(url)
 
     if resposta.status_code != 200:
-        print("Erro ao acessar a API.")
-        return None
+        print("❌ Erro ao acessar a API.")
+        return None, None
 
     dados = resposta.json()
-    print("DEBUG - Resposta da API:", dados)
 
     if 'rates' in dados and para in dados['rates']:
-        return dados['rates'][para]
+        taxa = dados['rates'][para]
+        return taxa, dados['date']
     else:
-        print("Erro: moeda inválida ou resposta inesperada.")
-        return None
+        print("❌ Moeda inválida ou resposta inesperada.")
+        return None, None
 
 def main():
     print("=== Conversor de Moedas ===")
-    valor = float(input("Valor a converter: "))
-    de = input("De qual moeda? (ex: USD): ").upper()
-    para = input("Para qual moeda? (ex: BRL): ").upper()
+    try:
+        valor = float(input("Valor a converter: "))
+        de = input("De qual moeda? (ex: USD): ").strip().upper()
+        para = input("Para qual moeda? (ex: BRL): ").strip().upper()
 
-    resultado = converter_moeda(valor, de, para)
+        resultado, data = converter_moeda(valor, de, para)
 
-    if resultado is not None:
-        print(f"\n{valor:.2f} {de} = {resultado:.2f} {para}")
-    else:
-        print("Conversão falhou.")
+        if resultado is not None:
+            print(f"\n✅ {valor:.2f} {de} = {resultado:.2f} {para} (Data: {data})")
+            print(f"💱 Taxa usada: 1 {de} = {resultado / valor:.4f} {para}")
+        else:
+            print("Conversão falhou.")
+
+    except ValueError:
+        print("❌ Valor inválido. Use apenas números.")
 
 if __name__ == "__main__":
     main()
